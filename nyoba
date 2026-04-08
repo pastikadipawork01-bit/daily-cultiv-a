@@ -307,17 +307,6 @@ end)
             showTopRightNotice('Daily Complete!', 999)
         end
     end
-	local function claimAllMail()
-    pcall(function()
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("\228\186\139\228\187\182")
-            :WaitForChild("\229\133\172\231\148\168")
-            :WaitForChild("\233\130\174\228\187\182")
-            :WaitForChild("\233\162\134\229\143\150\229\133\168\233\131\168\233\130\174\228\187\182")
-            :FireServer()
-    end)
-end
-
     local function setupFeaturesTab(features)
         local function checkPlayersInRange()
             local character = localPlayer.Character
@@ -712,7 +701,6 @@ end
                         everydaymission()
                         gamepassmission()
                         gamepassgiftget()
-						claimAllMail()
                         potionfull()
                         wait(20)
                     end
@@ -1196,7 +1184,7 @@ end
         features2:AddButton('TP', function()
             teleporttworld1()
         end)
-        local EndlessBattle = features2:AddSwitch('Endless Wave for Stage 50', function(bool)
+        local EndlessBattle = features2:AddSwitch('Endless Wave for Stage 75', function(bool)
 
             local AutoReenter = false
             local AutoReenterThread
