@@ -1,4 +1,4 @@
-﻿local Players = game:GetService("Players")
+local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 -- ===== FUNGSI MASUK ARENA =====
@@ -27,54 +27,51 @@ local function GoHome()
     end
 end
 
--- ===== URUTAN AUTO ARENA =====
-task.spawn(function()
-    -- Arena 1
-    JoinArena(1)
-    task.wait(2.5)
-    GoHome()
-    task.wait(4)
+-- ===== URUTAN AUTO ARENA (sequential/blocking, tanpa task.spawn) =====
+-- Arena 1
+JoinArena(1)
+task.wait(2.5)
+GoHome()
+task.wait(4)
 
-    -- Arena 2
-    JoinArena(2)
-    task.wait(1.5)
-    GoHome()
-    task.wait(4)
+-- Arena 2
+JoinArena(2)
+task.wait(1.5)
+GoHome()
+task.wait(4)
 
-    -- Arena 3
-    JoinArena(3)
-    task.wait(1.5)
-    GoHome()
-    task.wait(4)
+-- Arena 3
+JoinArena(3)
+task.wait(1.5)
+GoHome()
+task.wait(4)
 
-    -- Arena 4
-    JoinArena(4)
-    task.wait(1.5)
-    GoHome()
-    task.wait(4)
-	
-	-- Arena 1
-    JoinArena(1)
-    task.wait(1.5)
-    GoHome()
-    task.wait(4)
+-- Arena 4
+JoinArena(4)
+task.wait(1.5)
+GoHome()
+task.wait(4)
 
-    -- Arena 2
-    JoinArena(2)
-    task.wait(1.5)
-    GoHome()
-    task.wait(4)
+-- Arena 1
+JoinArena(1)
+task.wait(1.5)
+GoHome()
+task.wait(4)
 
-    -- Arena 3
-    JoinArena(3)
-    task.wait(1.5)
-    GoHome()
-    task.wait(4)
+-- Arena 2
+JoinArena(2)
+task.wait(1.5)
+GoHome()
+task.wait(4)
 
-    -- Arena 4
-    JoinArena(4)
-    task.wait(1.5)
-    GoHome()
-    task.wait(4)
-	
-end)
+-- Arena 3
+JoinArena(3)
+task.wait(1.5)
+GoHome()
+task.wait(4)
+
+-- Arena 4
+JoinArena(4)
+task.wait(1.5)
+GoHome()
+task.wait(4)
