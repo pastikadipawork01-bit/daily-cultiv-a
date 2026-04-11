@@ -701,7 +701,7 @@ end
             end
         end)
     local Autocollmission = features1:AddSwitch(
-        'Auto Claim Task(Gamepass Task and Gift)',
+        'Auto Claim Task( Task and Gift)',
         function(bool)
             Autocollmissionbool = bool
             if Autocollmissionbool then
@@ -710,8 +710,8 @@ end
                     while Autocollmissionbool do
                         mainmissionchack()
                         everydaymission()
-                        gamepassmission()
-                        gamepassgiftget()
+                        mission()
+                        giftget()
 						claimAllMail()
                         potionfull()
                         wait(20)
@@ -907,8 +907,7 @@ end
             'Unlock Auto Crafting (Gamepass)',
             function(bool)
                 local Refiningbool = bool
-                privileges:WaitForChild('超级炼制').Value = false
-                privileges:WaitForChild('自动炼制').Value = Refiningbool
+                
             end
         )
         Refining:Set(true)
