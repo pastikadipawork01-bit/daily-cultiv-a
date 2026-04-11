@@ -308,9 +308,12 @@ end)
         end
     end
 	local function claimAllMail()
-    game:GetService("ReplicatedStorage"):WaitForChild("\228\186\139\228\187\182"):WaitForChild("\229\133\172\231\148\168"):WaitForChild("\233\130\174\228\187\182"):WaitForChild("\233\162\134\229\143\150\229\133\168\233\131\168\233\130\174\228\187\182"):FireServer()
-
-    end)
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("\228\186\139\228\187\182")
+        :WaitForChild("\229\133\172\231\148\168")
+        :WaitForChild("\233\130\174\228\187\182")
+        :WaitForChild("\233\162\134\229\143\150\229\133\168\233\131\168\233\130\174\228\187\182")
+        :FireServer()
 end
 
     local function setupFeaturesTab(features)
