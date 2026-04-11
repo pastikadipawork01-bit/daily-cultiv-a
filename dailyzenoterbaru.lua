@@ -307,15 +307,7 @@ end)
             showTopRightNotice('Daily Complete!', 999)
         end
     end
-	local function claimAllMail()
-    game:GetService("ReplicatedStorage")
-        :WaitForChild("\228\186\139\228\187\182")
-        :WaitForChild("\229\133\172\231\148\168")
-        :WaitForChild("\233\130\174\228\187\182")
-        :WaitForChild("\233\162\134\229\143\150\229\133\168\233\131\168\233\130\174\228\187\182")
-        :FireServer()
-end
-
+	
     local function setupFeaturesTab(features)
         local function checkPlayersInRange()
             local character = localPlayer.Character
@@ -710,7 +702,6 @@ end
                         everydaymission()
                         mission()
                         giftget()
-						claimAllMail()
                         potionfull()
                         wait(20)
                     end
@@ -730,6 +721,19 @@ end
     )
 
     Autocollmission:Set(true)
+		
+		task.defer(function()
+    task.wait(10)
+    pcall(function()
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("\228\186\139\228\187\182")
+            :WaitForChild("\229\133\172\231\148\168")
+            :WaitForChild("\233\130\174\228\187\182")
+            :WaitForChild("\233\162\134\229\143\150\229\133\168\233\131\168\233\130\174\228\187\182")
+            :FireServer()
+    end)
+end)
+
     local invest = features1:AddSwitch('Auto Execute Investment', function(bool)
         investbool = bool
         if investbool then
