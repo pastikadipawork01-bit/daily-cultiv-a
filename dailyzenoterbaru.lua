@@ -723,7 +723,7 @@ end)
     Autocollmission:Set(true)
 		
 		task.defer(function()
-    task.wait(10)
+    task.wait(2)
     pcall(function()
         game:GetService("ReplicatedStorage")
             :WaitForChild("\228\186\139\228\187\182")
