@@ -635,7 +635,7 @@ end)
         local function Online_Gift_check()
             while Gife_check do
                 Online_Gift_start()
-                wait(5)
+                wait(1)
             end
         end
         local function ClaimOnlineRewards()
@@ -671,17 +671,25 @@ end)
             end
         end)
         spawn(function()
-    while true do
-        wait(300) -- 300 detik = 5 menit
-        
-        print("Auto check reward tiap 5 menit")
-        
-        hasExecutedToday = false
-        Gife_check = true
-        
-        ClaimOnlineRewards()
-    end
-end)
+            while true do
+                local currentUTCHour = tonumber(os.date('!*t').hour)
+                local currentUTCDate = os.date('!*t').day
+                local currentLocalHour = currentUTCHour + 8
+                if currentLocalHour >= 24 then
+                    currentLocalHour = currentLocalHour - 24
+                end
+                local currentLocalDate = currentUTCDate
+                if currentLocalHour == 0 then
+                    if lastExecutedDay ~= currentLocalDate then
+                        hasExecutedToday = false
+                        print('UTC+8 00:00，自動領取在線獎勳')
+                        Gife_check = true
+                        lastExecutedDay = currentLocalDate
+                    end
+                end
+                wait(60)
+            end
+        end)
     local Autocollmission = features1:AddSwitch(
         'Auto Claim Task( Task and Gift)',
         function(bool)
@@ -690,11 +698,11 @@ end)
                 -- 主任務循環（每60秒執行一次）
                 spawn(function()
                     while Autocollmissionbool do
-                        mainmissionchack()
-                        everydaymission()
-                        mission()
-                        giftget()
-                        potionfull()
+                        'mainmissionchack',
+        'everydaymission',
+        'gamepassmission',
+        'gamepassgiftget',
+        'potionfull',
                         wait(20)
                     end
                 end)
@@ -702,9 +710,10 @@ end)
                 -- dailyspin 獨立循環（每500秒執行一次）
                 spawn(function()
                     while Autocollmissionbool do
-                        dailyspin()
-                        offlinereward()
-                        everydaygem()
+                        'claimallmail',
+        'dailyspin',
+        'offlinereward',
+        'everydaygem',
                         wait(500)
                     end
                 end)
