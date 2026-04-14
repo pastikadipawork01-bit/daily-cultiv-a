@@ -547,60 +547,147 @@ end)
         end)
     end
 
-local function setupFeatures1Tab(features1)
+    local function setupFeatures1Tab(features1)
+        local timeLabel =
+            features1:AddLabel('Time Until Auto-Fetch: 0 Detik')
+        local playerGui = game.Players.LocalPlayer.PlayerGui
+        local Online_Gift = playerGui.GUI
+            :WaitForChild('二级界面')
+            :WaitForChild('节日活动商店')
+            :WaitForChild('背景')
+            :WaitForChild('右侧界面')
+            :WaitForChild('在线奖励')
+            :WaitForChild('列表')
+        local Gife_check = false
+        local countdownList = {}
+        local hasExecutedToday = false
+        local lastExecutedDay = os.date('%d')
 
-    local playerGui = game.Players.LocalPlayer.PlayerGui
-    local Online_Gift = playerGui.GUI
-        :WaitForChild('二级界面')
-        :WaitForChild('节日活动商店')
-        :WaitForChild('背景')
-        :WaitForChild('右侧界面')
-        :WaitForChild('在线奖励')
-        :WaitForChild('列表')
-
-    -- =========================
-    -- CLAIM ONLINE REWARD (DIRECT)
-    -- =========================
-    local function ClaimOnlineRewards()
-        print("Claim online rewards...")
-
-        for i = 1, 6 do
-            local args = { [1] = i }
-
-            pcall(function()
-                game:GetService('ReplicatedStorage')
-                    :FindFirstChild('\228\186\139\228\187\182')
-                    :FindFirstChild('\229\133\172\231\148\168')
-                    :FindFirstChild('\232\138\130\230\151\165\230\180\187\229\138\168')
-                    :FindFirstChild('\233\162\134\229\143\150\229\165\150\229\138\177')
-                    :FireServer(unpack(args))
-            end)
-
-            wait(0.5)
+        local function convertToSeconds(timeText)
+            local minutes, seconds = string.match(timeText, '(%d+):(%d+)')
+            if minutes and seconds then
+                return (tonumber(minutes) * 60) + tonumber(seconds)
+            end
+            return nil
         end
-    end
-
-    -- =========================
-    -- LOOP AUTO CLAIM (2 MENIT)
-    -- =========================
-    task.defer(function()
+        local function GetOnlineGiftCountdown()
+            hasExecutedToday = true
+            local minTime = math.huge
+            for i = 1, 6 do
+                local rewardName = string.format('在线奖励%02d', i)
+                local rewardFolder = Online_Gift:FindFirstChild(rewardName)
+                if rewardFolder then
+                    local button = rewardFolder:FindFirstChild('按钮')
+                    local countdown = button
+                        and button:FindFirstChild('倒计时')
+                    if countdown then
+                        local countdownText = countdown.Text
+                        countdownList[rewardName] = countdownText
+                        if string.match(countdownText, 'CLAIMED!') then
+                        elseif string.match(countdownText, 'DONE') then
+                            minTime = math.min(minTime, 0)
+                        elseif string.match(countdownText, '%d+:%d+') then
+                            local totalSeconds = convertToSeconds(countdownText)
+                            if totalSeconds then
+                                minTime = math.min(minTime, totalSeconds)
+                            end
+                        end
+                    end
+                end
+            end
+            return ((minTime < math.huge) and minTime) or nil
+        end
+        local minCountdown = GetOnlineGiftCountdown()
+        local nowminCountdown = minCountdown
+        local function Online_Gift_start()
+            local newMinCountdown = GetOnlineGiftCountdown()
+            if newMinCountdown and (newMinCountdown == minCountdown) then
+                nowminCountdown = nowminCountdown - 1
+            else
+                minCountdown = newMinCountdown
+                nowminCountdown = minCountdown
+            end
+            if nowminCountdown and (nowminCountdown > 0) then
+                timeLabel.Text = string.format(
+                    'Auto-fetch in %d seconds',
+                    nowminCountdown
+                )
+            elseif nowminCountdown and (nowminCountdown <= 0) then
+                timeLabel.Text = 'Countdown finished, preparing to claim rewards'
+                for i = 1, 6 do
+                    local args = { [1] = i }
+                    game:GetService('ReplicatedStorage')
+                        :FindFirstChild('\228\186\139\228\187\182')
+                        :FindFirstChild('\229\133\172\231\148\168')
+                        :FindFirstChild(
+                            '\232\138\130\230\151\165\230\180\187\229\138\168'
+                        )
+                        :FindFirstChild(
+                            '\233\162\134\229\143\150\229\165\150\229\138\177'
+                        )
+                        :FireServer(unpack(args))
+                end
+            else
+                timeLabel.Text = 'All rewards claimed'
+                Gife_check = false
+            end
+        end
+        local function Online_Gift_check()
+            while Gife_check do
+                Online_Gift_start()
+                wait(5)
+            end
+        end
+        local function ClaimOnlineRewards()
+            Gife_check = true
+            spawn(Online_Gift_check)
+        end
+        -- 创建按钮时引用函数
+        features1:AddButton('Auto Claim Online Rewards and Mail', ClaimOnlineRewards)
+        -- 启动时自动执行
+        task.defer(function()
+            ClaimOnlineRewards()
+        end)
+        local function CheckAllRewardsCompleted()
+            local allCompleted = true
+            GetOnlineGiftCountdown()
+            for i = 1, 6 do
+                local rewardName = string.format('在线奖励%02d', i)
+                local status = countdownList[rewardName]
+                if not status or not string.match(status, 'DONE') then
+                    allCompleted = false
+                    break
+                end
+            end
+            if allCompleted then
+                print('All online rewards have been completed!')
+                Gife_check = false
+            end
+        end
         spawn(function()
-            while true do
-                ClaimOnlineRewards()
-                wait(120) -- 2 menit
+            while Gife_check and not hasExecutedToday do
+                CheckAllRewardsCompleted()
+                wait(60)
             end
         end)
-    end)
-
-    -- =========================
-    -- LANJUTAN KODE KAMU (JANGAN DIHAPUS)
-    -- =========================
-
+        spawn(function()
+    while true do
+        wait(300) -- 300 detik = 5 menit
+        
+        print("Auto check reward tiap 5 menit")
+        
+        hasExecutedToday = false
+        Gife_check = true
+        
+        ClaimOnlineRewards()
+    end
+end)
     local Autocollmission = features1:AddSwitch(
         'Auto Claim Task( Task and Gift)',
         function(bool)
             Autocollmissionbool = bool
             if Autocollmissionbool then
+                -- 主任務循環（每60秒執行一次）
                 spawn(function()
                     while Autocollmissionbool do
                         mainmissionchack()
@@ -612,6 +699,7 @@ local function setupFeatures1Tab(features1)
                     end
                 end)
 
+                -- dailyspin 獨立循環（每500秒執行一次）
                 spawn(function()
                     while Autocollmissionbool do
                         dailyspin()
@@ -626,17 +714,17 @@ local function setupFeatures1Tab(features1)
 
     Autocollmission:Set(true)
 		
-    task.defer(function()
-        task.wait(2)
-        pcall(function()
-            game:GetService("ReplicatedStorage")
-                :WaitForChild("\228\186\139\228\187\182")
-                :WaitForChild("\229\133\172\231\148\168")
-                :WaitForChild("\233\130\174\228\187\182")
-                :WaitForChild("\233\162\134\229\143\150\229\133\168\233\131\168\233\130\174\228\187\182")
-                :FireServer()
-        end)
+		task.defer(function()
+    task.wait(2)
+    pcall(function()
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("\228\186\139\228\187\182")
+            :WaitForChild("\229\133\172\231\148\168")
+            :WaitForChild("\233\130\174\228\187\182")
+            :WaitForChild("\233\162\134\229\143\150\229\133\168\233\131\168\233\130\174\228\187\182")
+            :FireServer()
     end)
+end)
 
     local invest = features1:AddSwitch('Auto Execute Investment', function(bool)
         investbool = bool
