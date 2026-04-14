@@ -547,23 +547,22 @@ end)
         end)
     end
 
-    local function setupFeatures1Tab(features1)
-        local timeLabel =
-            features1:AddLabel('Time Until Auto-Fetch: 0 Detik')
-        local playerGui = game.Players.LocalPlayer.PlayerGui
-        local Online_Gift = playerGui.GUI
-            :WaitForChild('二级界面')
-            :WaitForChild('节日活动商店')
-            :WaitForChild('背景')
-            :WaitForChild('右侧界面')
-            :WaitForChild('在线奖励')
-            :WaitForChild('列表')
-        -- =========================
--- AUTO CLAIM ONLINE REWARD (20 MENIT LOOP)
--- =========================
-spawn(function()
-    while true do
-        print("Auto claim online reward jalan...")
+local function setupFeatures1Tab(features1)
+
+    local playerGui = game.Players.LocalPlayer.PlayerGui
+    local Online_Gift = playerGui.GUI
+        :WaitForChild('二级界面')
+        :WaitForChild('节日活动商店')
+        :WaitForChild('背景')
+        :WaitForChild('右侧界面')
+        :WaitForChild('在线奖励')
+        :WaitForChild('列表')
+
+    -- =========================
+    -- CLAIM ONLINE REWARD (DIRECT)
+    -- =========================
+    local function ClaimOnlineRewards()
+        print("Claim online rewards...")
 
         for i = 1, 6 do
             local args = { [1] = i }
@@ -579,16 +578,29 @@ spawn(function()
 
             wait(0.5)
         end
-
-        wait(1200) -- 20 menit
     end
-end)
+
+    -- =========================
+    -- LOOP AUTO CLAIM (2 MENIT)
+    -- =========================
+    task.defer(function()
+        spawn(function()
+            while true do
+                ClaimOnlineRewards()
+                wait(120) -- 2 menit
+            end
+        end)
+    end)
+
+    -- =========================
+    -- LANJUTAN KODE KAMU (JANGAN DIHAPUS)
+    -- =========================
+
     local Autocollmission = features1:AddSwitch(
         'Auto Claim Task( Task and Gift)',
         function(bool)
             Autocollmissionbool = bool
             if Autocollmissionbool then
-                -- 主任務循環（每60秒執行一次）
                 spawn(function()
                     while Autocollmissionbool do
                         mainmissionchack()
@@ -600,7 +612,6 @@ end)
                     end
                 end)
 
-                -- dailyspin 獨立循環（每500秒執行一次）
                 spawn(function()
                     while Autocollmissionbool do
                         dailyspin()
@@ -615,17 +626,17 @@ end)
 
     Autocollmission:Set(true)
 		
-		task.defer(function()
-    task.wait(2)
-    pcall(function()
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("\228\186\139\228\187\182")
-            :WaitForChild("\229\133\172\231\148\168")
-            :WaitForChild("\233\130\174\228\187\182")
-            :WaitForChild("\233\162\134\229\143\150\229\133\168\233\131\168\233\130\174\228\187\182")
-            :FireServer()
+    task.defer(function()
+        task.wait(2)
+        pcall(function()
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("\228\186\139\228\187\182")
+                :WaitForChild("\229\133\172\231\148\168")
+                :WaitForChild("\233\130\174\228\187\182")
+                :WaitForChild("\233\162\134\229\143\150\229\133\168\233\131\168\233\130\174\228\187\182")
+                :FireServer()
+        end)
     end)
-end)
 
     local invest = features1:AddSwitch('Auto Execute Investment', function(bool)
         investbool = bool
