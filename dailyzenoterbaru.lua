@@ -700,8 +700,8 @@ end)
                     while Autocollmissionbool do
                         mainmissionchack()
                         everydaymission()
-                        mission()
-                        giftget()
+                        gamepassmission()
+                        gamepassgiftget()
                         potionfull()
                         wait(20)
                     end
@@ -710,6 +710,7 @@ end)
                 -- dailyspin 獨立循環（每500秒執行一次）
                 spawn(function()
                     while Autocollmissionbool do
+						claimallmail()
                         dailyspin()
                         offlinereward()
                         everydaygem()
