@@ -547,87 +547,180 @@ end)
         end)
     end
 
-local function setupFeatures1Tab(features1)
+    local function setupFeatures1Tab(features1)
+        local timeLabel =
+            features1:AddLabel('Time Until Auto-Fetch: 0 Detik')
+        local playerGui = game.Players.LocalPlayer.PlayerGui
+        local Online_Gift = playerGui.GUI
+            :WaitForChild('二级界面')
+            :WaitForChild('节日活动商店')
+            :WaitForChild('背景')
+            :WaitForChild('右侧界面')
+            :WaitForChild('在线奖励')
+            :WaitForChild('列表')
+        local Gife_check = false
+        local countdownList = {}
+        local hasExecutedToday = false
+        local lastExecutedDay = os.date('%d')
 
-    local playerGui = game.Players.LocalPlayer.PlayerGui
-    local Online_Gift = playerGui.GUI
-        :WaitForChild('二级界面')
-        :WaitForChild('节日活动商店')
-        :WaitForChild('背景')
-        :WaitForChild('右侧界面')
-        :WaitForChild('在线奖励')
-        :WaitForChild('列表')
-
-    -- =========================
-    -- AUTO CLAIM ONLINE REWARD (20 MENIT)
-    -- =========================
-    local function ClaimOnlineRewardsLoop()
-        while true do
-            print("Auto claim online rewards jalan...")
-
-            for i = 1, 6 do
-                local args = { [1] = i }
-                game:GetService('ReplicatedStorage')
-                    :FindFirstChild('\228\186\139\228\187\182')
-                    :FindFirstChild('\229\133\172\231\148\168')
-                    :FindFirstChild('\232\138\130\230\151\165\230\180\187\229\138\168')
-                    :FindFirstChild('\233\162\134\229\143\150\229\165\150\229\138\177')
-                    :FireServer(unpack(args))
+        local function convertToSeconds(timeText)
+            local minutes, seconds = string.match(timeText, '(%d+):(%d+)')
+            if minutes and seconds then
+                return (tonumber(minutes) * 60) + tonumber(seconds)
             end
-
-            wait(1200) -- 20 menit
+            return nil
         end
-    end
-
-    -- tombol manual
-    features1:AddButton('Auto Claim Online Rewards (20m Loop)', function()
-        spawn(ClaimOnlineRewardsLoop)
-    end)
-
-    -- auto start
-    task.defer(function()
-        spawn(ClaimOnlineRewardsLoop)
-    end)
-
-    -- =========================
-    -- AUTO MISSION (20 MENIT)
-    -- =========================
+        local function GetOnlineGiftCountdown()
+            hasExecutedToday = true
+            local minTime = math.huge
+            for i = 1, 6 do
+                local rewardName = string.format('在线奖励%02d', i)
+                local rewardFolder = Online_Gift:FindFirstChild(rewardName)
+                if rewardFolder then
+                    local button = rewardFolder:FindFirstChild('按钮')
+                    local countdown = button
+                        and button:FindFirstChild('倒计时')
+                    if countdown then
+                        local countdownText = countdown.Text
+                        countdownList[rewardName] = countdownText
+                        if string.match(countdownText, 'CLAIMED!') then
+                        elseif string.match(countdownText, 'DONE') then
+                            minTime = math.min(minTime, 0)
+                        elseif string.match(countdownText, '%d+:%d+') then
+                            local totalSeconds = convertToSeconds(countdownText)
+                            if totalSeconds then
+                                minTime = math.min(minTime, totalSeconds)
+                            end
+                        end
+                    end
+                end
+            end
+            return ((minTime < math.huge) and minTime) or nil
+        end
+        local minCountdown = GetOnlineGiftCountdown()
+        local nowminCountdown = minCountdown
+        local function Online_Gift_start()
+            local newMinCountdown = GetOnlineGiftCountdown()
+            if newMinCountdown and (newMinCountdown == minCountdown) then
+                nowminCountdown = nowminCountdown - 1
+            else
+                minCountdown = newMinCountdown
+                nowminCountdown = minCountdown
+            end
+            if nowminCountdown and (nowminCountdown > 0) then
+                timeLabel.Text = string.format(
+                    'Auto-fetch in %d seconds',
+                    nowminCountdown
+                )
+            elseif nowminCountdown and (nowminCountdown <= 0) then
+                timeLabel.Text = 'Countdown finished, preparing to claim rewards'
+                for i = 1, 6 do
+                    local args = { [1] = i }
+                    game:GetService('ReplicatedStorage')
+                        :FindFirstChild('\228\186\139\228\187\182')
+                        :FindFirstChild('\229\133\172\231\148\168')
+                        :FindFirstChild(
+                            '\232\138\130\230\151\165\230\180\187\229\138\168'
+                        )
+                        :FindFirstChild(
+                            '\233\162\134\229\143\150\229\165\150\229\138\177'
+                        )
+                        :FireServer(unpack(args))
+                end
+            else
+                timeLabel.Text = 'All rewards claimed'
+                Gife_check = false
+            end
+        end
+        local function Online_Gift_check()
+            while Gife_check do
+                Online_Gift_start()
+                wait(1)
+            end
+        end
+        local function ClaimOnlineRewards()
+            Gife_check = true
+            spawn(Online_Gift_check)
+        end
+        -- 创建按钮时引用函数
+        features1:AddButton('Auto Claim Online Rewards and Mail', ClaimOnlineRewards)
+        -- 启动时自动执行
+        task.defer(function()
+            ClaimOnlineRewards()
+        end)
+        local function CheckAllRewardsCompleted()
+            local allCompleted = true
+            GetOnlineGiftCountdown()
+            for i = 1, 6 do
+                local rewardName = string.format('在线奖励%02d', i)
+                local status = countdownList[rewardName]
+                if not status or not string.match(status, 'DONE') then
+                    allCompleted = false
+                    break
+                end
+            end
+            if allCompleted then
+                print('All online rewards have been completed!')
+                Gife_check = false
+            end
+        end
+        spawn(function()
+            while Gife_check and not hasExecutedToday do
+                CheckAllRewardsCompleted()
+                wait(60)
+            end
+        end)
+        spawn(function()
+            while true do
+                local currentUTCHour = tonumber(os.date('!*t').hour)
+                local currentUTCDate = os.date('!*t').day
+                local currentLocalHour = currentUTCHour + 8
+                if currentLocalHour >= 24 then
+                    currentLocalHour = currentLocalHour - 24
+                end
+                local currentLocalDate = currentUTCDate
+                if currentLocalHour == 0 then
+                    if lastExecutedDay ~= currentLocalDate then
+                        hasExecutedToday = false
+                        print('UTC+8 00:00，自動領取在線獎勳')
+                        Gife_check = true
+                        lastExecutedDay = currentLocalDate
+                    end
+                end
+                wait(60)
+            end
+        end)
     local Autocollmission = features1:AddSwitch(
-        'Auto Claim Task (20m Loop)',
+        'Auto Claim Task( Task and Gift)',
         function(bool)
             Autocollmissionbool = bool
-
             if Autocollmissionbool then
+                -- 主任務循環（每60秒執行一次）
                 spawn(function()
                     while Autocollmissionbool do
-                        print("Auto mission jalan...")
-
                         mainmissionchack()
                         everydaymission()
-                        gamepassmission()
-                        gamepassgiftget()
-                        claimAllMail()
+                        mission()
+                        giftget()
                         potionfull()
-
-                        wait(1200) -- 20 menit
+                        wait(20)
                     end
                 end)
 
+                -- dailyspin 獨立循環（每500秒執行一次）
                 spawn(function()
                     while Autocollmissionbool do
-                        print("Auto spin & reward jalan...")
-
                         dailyspin()
                         offlinereward()
                         everydaygem()
-
-                        wait(1200) -- 20 menit
+                        wait(500)
                     end
                 end)
             end
         end
     )
-end
+
+    Autocollmission:Set(true)
 		
 		task.defer(function()
     task.wait(2)
