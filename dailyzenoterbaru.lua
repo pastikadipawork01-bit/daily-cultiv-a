@@ -2515,7 +2515,7 @@ end)
             local guildCoin = getGuildCoin()
 
             -- 高成本模式
-            if refreshCost > 7000 then
+            if refreshCost > 13000 then
                 if not herbController.highCostMode then
                     print(
                         '[系统] 进入高成本模式，结束草药购买任务'
